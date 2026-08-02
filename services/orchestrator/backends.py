@@ -35,7 +35,7 @@ class InferenceManager:
                             return
                         
                         async for chunk in response.aiter_text():
-                            for line in chunk.split('\\n'):
+                            for line in chunk.split('\n'):
                                 if line.startswith("data:"):
                                     data_str = line[5:].strip()
                                     try:
@@ -137,7 +137,7 @@ class InferenceManager:
                         yield "[✍️ Qwen gerando resposta final...]\\n\\n"
                         async with client.stream("POST", agent_model_url, json=payload, headers=headers, timeout=60.0) as stream_res:
                             async for chunk in stream_res.aiter_text():
-                                for line in chunk.split('\\n'):
+                                for line in chunk.split('\n'):
                                     if line.startswith("data: "):
                                         data_str = line[6:].strip()
                                         if data_str == "[DONE]":
