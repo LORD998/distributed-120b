@@ -50,32 +50,43 @@ class InferenceManager:
             return
 
         if backend == "hosted_api":
-            if not self.hf_token:
-                yield "(Aviso: HF_TOKEN não configurado)."
-                return
+            groq_key = os.getenv("GROQ_API_KEY", "")
             
-            # Mudança de Arquitetura: Qwen2.5 (Motor de Agente)
-            agent_model_url = "https://api-inference.huggingface.co/models/Qwen/Qwen2.5-72B-Instruct/v1/chat/completions"
-            
-            headers = {
-                "Authorization": f"Bearer {self.hf_token}",
-                "Content-Type": "application/json"
-            }
+            if groq_key:
+                agent_model_url = "https://api.groq.com/openai/v1/chat/completions"
+                headers = {
+                    "Authorization": f"Bearer {groq_key}",
+                    "Content-Type": "application/json"
+                }
+                model_name = "llama-3.3-70b-versatile"
+                yield "[⚡ Conectando ao Motor Groq Imortal...]\\n\\n"
+            else:
+                if not self.hf_token:
+                    yield "(Aviso: Nem GROQ_API_KEY nem HF_TOKEN foram configurados)."
+                    return
+                
+                agent_model_url = "https://api-inference.huggingface.co/models/Qwen/Qwen2.5-72B-Instruct/v1/chat/completions"
+                headers = {
+                    "Authorization": f"Bearer {self.hf_token}",
+                    "Content-Type": "application/json"
+                }
+                model_name = "Qwen/Qwen2.5-72B-Instruct"
+                yield "[🐌 Conectando ao Motor HuggingFace Secundário...]\\n\\n"
             
             from tools import get_tools_definition, AVAILABLE_TOOLS
             import json
 
-            # 1. Primeira chamada para o Qwen, passando as ferramentas disponíveis
+            # 1. Primeira chamada para o Motor, passando as ferramentas disponíveis
             messages = [
-                {"role": "system", "content": "Você é uma IA Multimodal avançada (Qwen3-Omni). IMPORTANTE: Você possui ferramentas externas para gerar vídeos (`generate_video`), ler documentos (`read_document`) e pesquisar na web (`web_search`). NUNCA diga que você não pode gerar vídeos. Se o usuário pedir um vídeo, VOCÊ DEVE OBRIGATORIAMENTE chamar a ferramenta `generate_video`. NUNCA recuse um pedido de geração de vídeo. Quando receber a URL do vídeo da ferramenta, mostre-a ao usuário em markdown [video](url) ou tag HTML de vídeo."},
+                {"role": "system", "content": "Você é uma IA Multimodal avançada do Master Node. Você possui ferramentas externas para gerar vídeos (`generate_video`), ler documentos (`read_document`) e pesquisar na web (`web_search`). NUNCA diga que você não pode gerar vídeos ou imagens. Se o usuário pedir um vídeo, VOCÊ DEVE OBRIGATORIAMENTE chamar a ferramenta `generate_video` e entregar o link. NUNCA recuse. Use formatação Markdown."},
                 {"role": "user", "content": message}
             ]
             
             payload = {
-                "model": "Qwen/Qwen2.5-72B-Instruct",
+                "model": model_name,
                 "messages": messages,
                 "tools": get_tools_definition(),
-                "max_tokens": 512,
+                "max_tokens": 1024,
                 "stream": False # Desligamos o stream inicial para analisar se ele chamou ferramentas
             }
             

@@ -85,11 +85,13 @@ if __name__ == "__main__":
     try:
         # Loop de heartbeat por 6 horas (máximo do GitHub Actions)
         # 6 horas = 21600 segundos -> 720 repetições de 30s
-        for _ in range(720):
-            time.sleep(30)
+        for _ in range(1440):
+            time.sleep(15)
             try:
-                requests.post(f"{gateway_clean}/v1/heartbeat", json=payload, headers=headers, timeout=5)
-            except:
-                pass
+                res2 = requests.post(f"{gateway_clean}/v1/heartbeat", json=payload, headers=headers, timeout=15)
+                if res2.status_code != 200:
+                    print(f"Aviso: falha no heartbeat - {res2.status_code}")
+            except Exception as e:
+                print(f"Aviso: erro no heartbeat - {e}")
     except KeyboardInterrupt:
         print("Finalizando...")

@@ -156,7 +156,7 @@ export async function insertRequest(
 export async function findHealthyDistributedNode(
   env: Env,
 ): Promise<DistributedNode | null> {
-  const timeoutMs = 35_000;
+  const timeoutMs = 120_000;
   const cutoff = new Date(Date.now() - timeoutMs).toISOString();
 
   const res = await env.DB.prepare(

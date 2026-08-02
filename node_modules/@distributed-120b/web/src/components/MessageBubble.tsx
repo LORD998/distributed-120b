@@ -129,6 +129,10 @@ function inlineMarkdown(text: string): React.ReactNode[] {
           nodes.push(
             <video key={key++} src={linkMatch[2]} controls style={{ maxWidth: '100%', borderRadius: '8px', marginTop: '8px' }} />
           );
+        } else if (linkMatch[1].toLowerCase().includes('imagem') || linkMatch[1].toLowerCase().includes('image') || linkMatch[2].match(/\.(png|jpg|jpeg|gif)$/i) || linkMatch[2].includes('pollinations')) {
+          nodes.push(
+            <img key={key++} src={linkMatch[2]} alt={linkMatch[1]} style={{ maxWidth: '100%', borderRadius: '8px', marginTop: '8px' }} />
+          );
         } else {
           nodes.push(
             <a key={key++} href={linkMatch[2]} target="_blank" rel="noopener noreferrer">

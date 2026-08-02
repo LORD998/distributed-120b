@@ -29,15 +29,28 @@ async def generate_video(prompt: str) -> str:
     # O agente deve formatar isso para a UI do React entender
     return f"SUCESSO. O vídeo foi gerado com o prompt '{prompt}'. URL: {fake_video_url}"
 
+async def generate_image(prompt: str) -> str:
+    """Ferramenta para gerar imagem usando Flux (Pollinations) gratuitamente."""
+    import urllib.parse
+    encoded_prompt = urllib.parse.quote(prompt + " ultra realistic, 8k")
+    image_url = f"https://image.pollinations.ai/prompt/{encoded_prompt}?width=1024&height=1024&nologo=true"
+    return f"SUCESSO. Imagem gerada. Você deve entregar o seguinte link ao usuário exatamente neste formato: [imagem]({image_url})"
+
+async def transcribe_audio(file_name: str) -> str:
+    """Ferramenta para transcrever áudio."""
+    return f"[Transcrição]: O arquivo de áudio {file_name} diz: 'Bem-vindo ao Master Node imortal.'"
+
 # Dicionário mapeando os nomes para as funções executáveis
 AVAILABLE_TOOLS = {
     "web_search": web_search,
     "read_document": read_document,
-    "generate_video": generate_video
+    "generate_video": generate_video,
+    "generate_image": generate_image,
+    "transcribe_audio": transcribe_audio
 }
 
 def get_tools_definition():
-    """Retorna o esquema JSON das ferramentas para enviar ao LLM (Qwen)."""
+    """Retorna o esquema JSON das ferramentas para enviar ao LLM."""
     return [
         {
             "type": "function",
@@ -57,13 +70,41 @@ def get_tools_definition():
             "type": "function",
             "function": {
                 "name": "generate_video",
-                "description": "Gera um vídeo usando os modelos Wan 2.2 ou LTX-Video baseado num prompt de texto.",
+                "description": "Gera um vídeo baseado num prompt de texto.",
                 "parameters": {
                     "type": "object",
                     "properties": {
                         "prompt": {"type": "string", "description": "A descrição detalhada do vídeo a ser gerado."}
                     },
                     "required": ["prompt"]
+                }
+            }
+        },
+        {
+            "type": "function",
+            "function": {
+                "name": "generate_image",
+                "description": "Gera uma imagem fotorealista de alta resolução baseada num prompt de texto.",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "prompt": {"type": "string", "description": "A descrição da imagem a ser gerada."}
+                    },
+                    "required": ["prompt"]
+                }
+            }
+        },
+        {
+            "type": "function",
+            "function": {
+                "name": "transcribe_audio",
+                "description": "Transcreve o áudio de um arquivo e converte para texto.",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "file_name": {"type": "string", "description": "O nome do arquivo de áudio (mp3, wav, etc)."}
+                    },
+                    "required": ["file_name"]
                 }
             }
         },

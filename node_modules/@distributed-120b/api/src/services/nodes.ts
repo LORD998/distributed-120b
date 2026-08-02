@@ -1,6 +1,6 @@
 import type { DistributedNode, Env } from '../types';
 
-const NODE_TIMEOUT_SECONDS = 35;
+const NODE_TIMEOUT_SECONDS = 120;
 
 /**
  * Regista ou atualiza um heartbeat de um nó distribuído (Fase 2).
