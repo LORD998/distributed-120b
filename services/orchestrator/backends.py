@@ -13,7 +13,7 @@ class InferenceManager:
         # Vamos apontar para o OrpoLlama-3-120B (merge de 120B) ou Mixtral-8x22B (141B)
         self.model_url = "https://api-inference.huggingface.co/models/mlabonne/OrpoLlama-3-120B"
 
-    async def generate(self, backend: str, message: str):
+    async def generate(self, backend: str, message: str, use_deep_think: bool = False):
         if backend == "cache":
             # Simulação rápida de hit no cache
             words = ["Olá!", " Encontrei", " esta", " resposta", " no", " cache", " instantâneo."]
@@ -51,8 +51,20 @@ class InferenceManager:
 
         if backend == "hosted_api":
             groq_key = os.getenv("GROQ_API_KEY", "")
+            openrouter_key = os.getenv("OPENROUTER_API_KEY", "")
             
-            if groq_key:
+            is_openrouter = False
+            
+            if use_deep_think and openrouter_key:
+                agent_model_url = "https://openrouter.ai/api/v1/chat/completions"
+                headers = {
+                    "Authorization": f"Bearer {openrouter_key}",
+                    "Content-Type": "application/json"
+                }
+                model_name = "inclusionai/ling-3.0-flash:free"
+                yield "[⚡ Conectando ao Motor OpenRouter Deep-Think...]\\n\\n"
+                is_openrouter = True
+            elif groq_key:
                 agent_model_url = "https://api.groq.com/openai/v1/chat/completions"
                 headers = {
                     "Authorization": f"Bearer {groq_key}",
@@ -90,13 +102,16 @@ class InferenceManager:
                 "stream": False # Desligamos o stream inicial para analisar se ele chamou ferramentas
             }
             
-            yield "[🧠 Qwen-Omni analisando a requisição...]\\n\\n"
+            if is_openrouter:
+                payload["reasoning"] = {}
+            
+            yield f"[🧠 {model_name} analisando a requisição...]\\n\\n"
             
             async with httpx.AsyncClient() as client:
                 try:
                     res = await client.post(agent_model_url, json=payload, headers=headers, timeout=60.0)
                     if res.status_code != 200:
-                        yield f"[Erro na API do Qwen: {res.text}]"
+                        yield f"[Erro na API {model_name}: {res.text}]"
                         return
                     
                     data = res.json()
@@ -104,7 +119,7 @@ class InferenceManager:
                     
                     # Verifica se o modelo decidiu usar alguma ferramenta
                     if "tool_calls" in response_message and response_message["tool_calls"]:
-                        yield "[🛠️ Qwen decidiu usar ferramentas...]\\n"
+                        yield "[🛠️ Decidiu usar ferramentas...]\\n"
                         messages.append(response_message)
                         
                         for tool_call in response_message["tool_calls"]:
@@ -129,12 +144,12 @@ class InferenceManager:
                                 "tool_call_id": tool_call["id"]
                             })
                             
-                        # 2. Segunda chamada para o Qwen com os resultados das ferramentas
+                        # 2. Segunda chamada para o modelo com os resultados das ferramentas
                         payload["messages"] = messages
                         payload["stream"] = True
                         del payload["tools"] # Removemos tools para forçar a resposta final em texto
                         
-                        yield "[✍️ Qwen gerando resposta final...]\\n\\n"
+                        yield "[✍️ Gerando resposta final...]\\n\\n"
                         async with client.stream("POST", agent_model_url, json=payload, headers=headers, timeout=60.0) as stream_res:
                             async for chunk in stream_res.aiter_text():
                                 for line in chunk.split('\n'):
@@ -147,11 +162,17 @@ class InferenceManager:
                                             delta = chunk_data["choices"][0]["delta"]
                                             if "content" in delta and delta["content"]:
                                                 yield delta["content"]
+                                            # Para openrouter reasoning stream (pode variar entre models, capturando content usualmente já basta para a saída mesclada)
+                                            if "reasoning" in delta and delta["reasoning"]:
+                                                yield f"_[Raciocínio]: {delta['reasoning']}_\\n"
                                         except:
                                             pass
                     else:
                         # O modelo não chamou ferramentas, respondeu normalmente
                         content = response_message.get("content", "")
+                        reasoning = response_message.get("reasoning", "")
+                        if reasoning:
+                            yield f"_[Raciocínio do Motor]: {reasoning}_\\n\\n"
                         yield content
                         
                 except Exception as e:

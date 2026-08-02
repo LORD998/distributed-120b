@@ -34,6 +34,7 @@ export async function handleChat(request: Request, env: Env): Promise<Response> 
 
   const message = typeof body.message === 'string' ? body.message.trim() : '';
   const maxOutputTokens = typeof body.max_output_tokens === 'number' ? body.max_output_tokens : 512;
+  const useDeepThink = typeof body.use_deep_think === 'boolean' ? body.use_deep_think : false;
 
   // Validação
   if (!message) {
@@ -138,7 +139,7 @@ export async function handleChat(request: Request, env: Env): Promise<Response> 
           backendId = backend.id;
           try {
             result = await backend.generateStream(
-              { conversation_id: conversationId, message, max_output_tokens: maxOutputTokens },
+              { conversation_id: conversationId, message, max_output_tokens: maxOutputTokens, use_deep_think: useDeepThink },
               env,
               send,
             );

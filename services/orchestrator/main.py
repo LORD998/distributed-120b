@@ -20,6 +20,7 @@ inference_manager = InferenceManager()
 async def chat_endpoint(request: Request):
     body = await request.json()
     user_message = body.get("message", "")
+    use_deep_think = body.get("use_deep_think", False)
     
     # Roteamento baseado em regras (Cache -> API -> Petals)
     backend_choice = route_request(user_message)
@@ -27,7 +28,7 @@ async def chat_endpoint(request: Request):
     async def event_generator():
         yield f"data: {json.dumps({'backend': backend_choice})}\n\n"
         
-        async for token in inference_manager.generate(backend_choice, user_message):
+        async for token in inference_manager.generate(backend_choice, user_message, use_deep_think=use_deep_think):
             yield f"data: {json.dumps({'text': token})}\n\n"
             
         yield f"data: {json.dumps({'done': True})}\n\n"

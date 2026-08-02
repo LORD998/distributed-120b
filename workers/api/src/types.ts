@@ -48,6 +48,7 @@ export interface ChatRequestBody {
   conversation_id?: string;
   message: string;
   max_output_tokens?: number;
+  use_deep_think?: boolean;
 }
 
 export interface BackendChoice {
