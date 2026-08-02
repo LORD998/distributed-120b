@@ -2,6 +2,9 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Message, NetworkMetrics } from '../types';
 import { useStreaming } from './useStreaming';
 import { useConversations } from './useConversations';
+import { generateImage } from '../services/api';
+
+const IMAGE_COMMAND = /^\/(imagem|image)\s+(.+)$/is;
 
 export function useChat() {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -49,7 +52,7 @@ export function useChat() {
   });
 
   const sendMessage = useCallback(
-    async (text: string) => {
+    async (text: string, useDeepThink: boolean = false) => {
       const trimmed = text.trim();
       if (!trimmed || isStreaming) return;
 
@@ -83,10 +86,38 @@ export function useChat() {
         conversationId = conv.id;
       }
 
+      // Comando /imagem <prompt> — gera uma imagem em vez de conversar com o modelo de texto
+      const imageMatch = trimmed.match(IMAGE_COMMAND);
+      if (imageMatch) {
+        const prompt = imageMatch[2].trim();
+        try {
+          const { url: imageUrl } = await generateImage(prompt);
+          setThinking(false);
+          setMessages((prev) =>
+            prev.map((m) =>
+              m.id === assistantMsg.id
+                ? { ...m, isStreaming: false, content: `[imagem: ${prompt}](${imageUrl})` }
+                : m,
+            ),
+          );
+        } catch (err) {
+          setThinking(false);
+          const message = err instanceof Error ? err.message : 'Erro ao gerar imagem';
+          setError(message);
+          setMessages((prev) =>
+            prev.map((m) =>
+              m.id === assistantMsg.id ? { ...m, isStreaming: false, isError: true, content: message } : m,
+            ),
+          );
+        }
+        return;
+      }
+
       await send({
         conversation_id: conversationId,
         message: trimmed,
         max_output_tokens: 512,
+        use_deep_think: useDeepThink,
       });
     },
     [isStreaming, conversations, send],
