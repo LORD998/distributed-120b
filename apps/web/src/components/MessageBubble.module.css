@@ -46,17 +46,21 @@
 }
 
 .userBubble {
-  background: linear-gradient(135deg, var(--accent-color), var(--accent-hover));
+  background: var(--gradient-primary);
   color: white;
   border: none;
   border-top-right-radius: var(--radius-sm);
+  box-shadow: var(--shadow-sm);
 }
 
 .assistantBubble {
-  background: var(--bg-secondary);
+  background: var(--bg-glass);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   color: var(--text-primary);
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--border-color-strong);
   border-top-left-radius: var(--radius-sm);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
 }
 
 .errorBubble {

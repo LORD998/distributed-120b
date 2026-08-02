@@ -1,23 +1,27 @@
 .container {
-  padding: 16px 24px 12px;
-  border-top: 1px solid var(--border-color);
-  background: var(--bg-glass-strong);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  padding: 0 24px 24px;
+  background: transparent;
+  position: relative;
 }
 
 .inputWrapper {
   display: flex;
   align-items: flex-end;
   gap: 8px;
-  padding: 8px 8px 8px 12px;
+  padding: 8px 8px 8px 16px;
   border-radius: var(--radius-xl);
-  transition: border-color var(--transition-base), box-shadow var(--transition-base);
+  background: var(--bg-glass-strong);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--border-color-strong);
+  transition: all var(--transition-base);
+  box-shadow: var(--shadow-md), var(--shadow-glass);
 }
 
 .inputWrapper:focus-within {
   border-color: var(--accent-color);
-  box-shadow: 0 0 0 3px var(--accent-soft);
+  box-shadow: var(--shadow-accent), inset 0 0 0 1px var(--accent-color);
+  transform: translateY(-2px);
 }
 
 .attachButton {

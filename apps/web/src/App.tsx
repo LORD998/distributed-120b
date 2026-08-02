@@ -49,10 +49,12 @@ export default function App() {
         <header className={styles.header}>
           <div className={styles.headerLeft}>
             <div className={styles.logo}>
-              <Zap size={20} fill="currentColor" />
-              <span>120B Network</span>
+              <div className={styles.logoIcon}>
+                <Zap size={18} fill="currentColor" strokeWidth={1} />
+              </div>
+              <span className={styles.brandName}>Aura AI</span>
             </div>
-            <span className={styles.headerBadge}>Fase 1</span>
+            <span className={styles.headerBadge}>Workspace</span>
           </div>
           <div className={styles.headerRight}>
             {conversations.activeId && (
