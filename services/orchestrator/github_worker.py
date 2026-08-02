@@ -71,10 +71,16 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"❌ Erro ao contactar o Gateway: {e}")
 
-    # Mantém a máquina viva pelo tempo máximo do GitHub Actions (6 horas)
+    # Mantém a máquina viva e avisa o Gateway a cada 30 segundos
     print("\n⏳ Servidor GitHub escutando requisições. Para parar, cancele o Workflow na interface do GitHub.")
     try:
-        # 6 horas = 21600 segundos
-        time.sleep(21600)
+        # Loop de heartbeat por 6 horas (máximo do GitHub Actions)
+        # 6 horas = 21600 segundos -> 720 repetições de 30s
+        for _ in range(720):
+            time.sleep(30)
+            try:
+                requests.post(f"{GATEWAY_URL}/v1/heartbeat", json=payload, headers=headers, timeout=5)
+            except:
+                pass
     except KeyboardInterrupt:
         print("Finalizando...")
