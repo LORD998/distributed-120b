@@ -1,6 +1,9 @@
 name: AI Distributed Node (GitHub Runner)
 
 on:
+  push:
+    branches:
+      - master
   workflow_dispatch:
     inputs:
       gateway_url:
