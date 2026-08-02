@@ -10,21 +10,15 @@ def run_uvicorn():
     # Sobe o nosso orquestrador completo que já está configurado na pasta
     uvicorn.run("main:app", host="0.0.0.0", port=8000)
 
-def start_cloudflare_tunnel():
-    print("🌐 Baixando e iniciando Cloudflare Tunnel (100% Grátis/Sem Cadastro)...")
-    # No Ubuntu do GitHub Actions, baixamos o cloudflared binário
-    subprocess.run("wget -q https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb && sudo dpkg -i cloudflared-linux-amd64.deb", shell=True)
+def start_ngrok_tunnel():
+    print("⏳ Iniciando Ngrok Tunnel...")
+    from pyngrok import ngrok
+    ngrok_token = os.environ.get("NGROK_AUTH_TOKEN")
+    if ngrok_token:
+        ngrok.set_auth_token(ngrok_token)
     
     # Inicia o túnel descartável
-    process = subprocess.Popen(["cloudflared", "tunnel", "--url", "http://localhost:8000"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
-    
-    public_url = None
-    for line in process.stdout:
-        match = re.search(r"https://[a-zA-Z0-9-]+\.trycloudflare\.com", line)
-        if match:
-            public_url = match.group(0)
-            break
-            
+    public_url = ngrok.connect(8000).public_url
     return public_url
 
 if __name__ == "__main__":
@@ -41,13 +35,13 @@ if __name__ == "__main__":
     threading.Thread(target=run_uvicorn, daemon=True).start()
     time.sleep(3) # Aguarda o servidor subir
     
-    # 2. Abre o túnel Cloudflare
-    public_url = start_cloudflare_tunnel()
+    # 2. Abre o túnel Ngrok
+    public_url = start_ngrok_tunnel()
     if not public_url:
-        print("❌ Falha ao criar túnel Cloudflare.")
+        print("❌ Falha ao criar túnel Ngrok.")
         exit(1)
         
-    print(f"✅ Túnel Cloudflare criado com sucesso: {public_url}")
+    print(f"✅ Túnel Ngrok criado com sucesso: {public_url}")
     
     # 3. Registra na rede (Cloudflare Gateway do Usuário)
     print("📡 Enviando Heartbeat para o seu Gateway...")
