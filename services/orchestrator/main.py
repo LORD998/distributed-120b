@@ -33,3 +33,29 @@ async def chat_endpoint(request: Request):
         yield f"data: {json.dumps({'done': True})}\n\n"
 
     return StreamingResponse(event_generator(), media_type="text/event-stream")
+
+from vision import VisionMemoryEngine
+vision_engine = VisionMemoryEngine()
+
+@app.post("/v1/vision/search")
+async def vision_search_endpoint(request: Request):
+    """
+    Rota independente para a Aura Vision AI.
+    Exemplo de payload:
+    {
+        "query": "um cachorro",
+        "image_urls": ["url_gato", "url_cachorro"]
+    }
+    """
+    body = await request.json()
+    query = body.get("query", "")
+    image_urls = body.get("image_urls", [])
+    
+    if not query or not image_urls:
+        return {"error": "Envie 'query' e 'image_urls'"}
+        
+    try:
+        result = await vision_engine.search_best_image(query, image_urls)
+        return result
+    except Exception as e:
+        return {"error": str(e)}
