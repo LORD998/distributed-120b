@@ -1,0 +1,19 @@
+{
+  "name": "distributed-120b",
+  "private": true,
+  "version": "0.1.0",
+  "description": "IA Distribuída 120B — Fase 1 (Web + Cloudflare Worker)",
+  "workspaces": [
+    "apps/*",
+    "workers/*"
+  ],
+  "scripts": {
+    "dev:web": "npm run dev --workspace @distributed-120b/web",
+    "dev:api": "npm run dev --workspace @distributed-120b/api",
+    "build": "npm run build --workspace @distributed-120b/web",
+    "lint": "npm run lint --workspaces",
+    "deploy:api": "npm run deploy --workspace @distributed-120b/api",
+    "db:migrate:local": "npm run db:migrate:local --workspace @distributed-120b/api",
+    "db:migrate:remote": "npm run db:migrate:remote --workspace @distributed-120b/api"
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "distributed-120b-api",
+  "main": "src/index.ts",
+  "compatibility_date": "2024-09-23",
+
+  "vars": {
+    "INFERENCE_MODE": "mock",
+    "MODEL_NAME": "openai/gpt-oss-120b",
+    "CACHE_TTL_SECONDS": "86400",
+    "MAX_MESSAGE_LENGTH": "4000",
+    "RATE_LIMIT_MAX": "20",
+    "RATE_LIMIT_WINDOW_SECONDS": "60"
+  },
+
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "distributed_120b",
+      "database_id": "REPLACE_WITH_DATABASE_ID",
+      "migrations_dir": "migrations"
+    }
+  ],
+
+  "kv_namespaces": [
+    {
+      "binding": "KV",
+      "id": "REPLACE_WITH_KV_ID"
+    }
+  ]
+}

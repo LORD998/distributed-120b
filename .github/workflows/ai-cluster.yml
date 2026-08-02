@@ -1,0 +1,53 @@
+name: AI Distributed Node (GitHub Runner)
+
+on:
+  workflow_dispatch:
+    inputs:
+      gateway_url:
+        description: 'URL do seu API Gateway (ex: https://seu-app.workers.dev)'
+        required: true
+        type: string
+      node_token:
+        description: 'Seu token gerado na interface Web'
+        required: true
+        type: string
+
+jobs:
+  run-orchestrator:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install System Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y rclone wget curl
+
+      - name: Install Python Packages
+        run: |
+          pip install fastapi uvicorn requests httpx python-dotenv pyngrok
+          
+      - name: Configure Google Drive (rclone)
+        env:
+          RCLONE_CONF: ${{ secrets.RCLONE_CONF }}
+        run: |
+          mkdir -p ~/.config/rclone/
+          echo "$RCLONE_CONF" > ~/.config/rclone/rclone.conf
+          # rclone mount drive: ~/gdrive &  # (Montagem seria feita aqui)
+          echo "Google Drive preparado!"
+
+      - name: Run Orchestrator and Tunnel
+        env:
+          NGROK_AUTH_TOKEN: ${{ secrets.NGROK_AUTH_TOKEN }}
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          GATEWAY_URL: ${{ inputs.gateway_url }}
+          NODE_TOKEN: ${{ inputs.node_token }}
+        run: |
+          cd services/orchestrator
+          python github_worker.py
