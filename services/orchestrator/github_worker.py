@@ -12,15 +12,20 @@ def run_uvicorn():
 
 def start_localtunnel():
     print("⏳ Iniciando LocalTunnel (grátis/sem token)...")
-    # Inicia o túnel descartável usando npx
-    process = subprocess.Popen(["npx", "--yes", "localtunnel", "--port", "8000"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+    # Redireciona a saída para um arquivo para evitar block buffering do Node.js
+    os.system("npx --yes localtunnel --port 8000 > tunnel.log 2>&1 &")
     
     public_url = None
-    for line in process.stdout:
-        match = re.search(r"https://[a-zA-Z0-9-]+\.loca\.lt", line)
-        if match:
-            public_url = match.group(0)
-            break
+    # Faz polling no arquivo por 15 segundos
+    for _ in range(15):
+        time.sleep(1)
+        if os.path.exists("tunnel.log"):
+            with open("tunnel.log", "r") as f:
+                content = f.read()
+                match = re.search(r"https://[a-zA-Z0-9-]+\.loca\.lt", content)
+                if match:
+                    public_url = match.group(0)
+                    break
             
     return public_url
 
@@ -48,6 +53,9 @@ if __name__ == "__main__":
     
     # 3. Registra na rede (Cloudflare Gateway do Usuário)
     print("📡 Enviando Heartbeat para o seu Gateway...")
+    
+    gateway_clean = GATEWAY_URL.rstrip('/')
+    
     headers = {
         "Authorization": f"Bearer {NODE_TOKEN}",
         "Bypass-Tunnel-Reminder": "true",
@@ -63,7 +71,7 @@ if __name__ == "__main__":
     }
     
     try:
-        res = requests.post(f"{GATEWAY_URL}/v1/heartbeat", json=payload, headers=headers)
+        res = requests.post(f"{gateway_clean}/v1/heartbeat", json=payload, headers=headers)
         if res.status_code == 200:
             print("🎉 SUCESSO! Esta máquina virtual da Microsoft agora é sua escrava.")
             print("Os vídeos pesados e PDFs serão processados usando os recursos desta máquina e salvos no Google Drive.")
@@ -80,7 +88,7 @@ if __name__ == "__main__":
         for _ in range(720):
             time.sleep(30)
             try:
-                requests.post(f"{GATEWAY_URL}/v1/heartbeat", json=payload, headers=headers, timeout=5)
+                requests.post(f"{gateway_clean}/v1/heartbeat", json=payload, headers=headers, timeout=5)
             except:
                 pass
     except KeyboardInterrupt:
