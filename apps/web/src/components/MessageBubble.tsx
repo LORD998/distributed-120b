@@ -86,6 +86,23 @@ function renderMarkdown(text: string): React.ReactNode[] {
       continue;
     }
 
+    // Pensamento Profundo (Raciocínio)
+    const thinkMatch = line.match(/^_\[Raciocínio.*\]:\s*(.*)_$/) || line.match(/^_\[Raciocínio.*\]:\s*(.*)$/);
+    if (thinkMatch) {
+      flushList();
+      nodes.push(
+        <details key={`think-${key++}`} className={styles.thinkBox}>
+          <summary className={styles.thinkSummary}>
+             Raciocínio do Motor
+          </summary>
+          <div className={styles.thinkContent}>
+            {inlineMarkdown(thinkMatch[1])}
+          </div>
+        </details>
+      );
+      continue;
+    }
+
     // Linha em branco
     if (line.trim() === '') {
       flushList();
