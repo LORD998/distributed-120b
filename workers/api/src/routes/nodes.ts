@@ -27,6 +27,7 @@ export async function handleNodes(request: Request, env: Env): Promise<Response>
 
       const body = (await request.json()) as {
         node_id?: string;
+        endpoint?: string;
         region?: string;
         vram_gb?: number;
         gpu_model?: string;
@@ -37,6 +38,7 @@ export async function handleNodes(request: Request, env: Env): Promise<Response>
       }
       await upsertHeartbeat(env, {
         node_id: body.node_id,
+        endpoint: body.endpoint,
         region: body.region,
         vram_gb: body.vram_gb,
         gpu_model: body.gpu_model,

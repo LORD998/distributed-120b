@@ -10,6 +10,7 @@ export async function upsertHeartbeat(
   env: Env,
   body: {
     node_id: string;
+    endpoint?: string;
     region?: string;
     vram_gb?: number;
     gpu_model?: string;
@@ -23,6 +24,7 @@ export async function upsertHeartbeat(
     `INSERT INTO inference_nodes (id, name, endpoint, region, gpu_model, vram_gb, status, last_heartbeat)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
      ON CONFLICT(id) DO UPDATE SET
+       endpoint=excluded.endpoint,
        region=excluded.region,
        gpu_model=excluded.gpu_model,
        vram_gb=excluded.vram_gb,
@@ -32,7 +34,7 @@ export async function upsertHeartbeat(
     .bind(
       body.node_id,
       body.node_id,
-      `${body.node_id}.local`,
+      body.endpoint ?? `${body.node_id}.local`,
       body.region ?? 'unknown',
       body.gpu_model ?? 'unknown',
       body.vram_gb ?? 0,

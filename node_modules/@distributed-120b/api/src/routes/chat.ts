@@ -70,6 +70,19 @@ export async function handleChat(request: Request, env: Env): Promise<Response> 
       try {
         send({ type: 'accepted', request_id: requestId });
 
+        // Garante conversa.
+        let conversationId = body.conversation_id;
+        const title = message.length > 40 ? `${message.slice(0, 40)}.` : message;
+        if (!conversationId) {
+          const conv = await createConversation(env, title);
+          conversationId = conv.id;
+        } else if (!(await conversationExists(env, conversationId))) {
+          await createConversation(env, title, 'anonymous', conversationId);
+        }
+
+        // Guarda a mensagem do utilizador (tanto faz se é cache hit ou miss)
+        await insertMessage(env, conversationId, 'user', message);
+
         // Cache
         const cached = await getCachedResponse(env, message);
         if (cached) {
@@ -96,9 +109,11 @@ export async function handleChat(request: Request, env: Env): Promise<Response> 
           result = { content: cached.content, inputTokens: Math.ceil(message.length / 4), outputTokens: tokens.length };
           latencyMs = Date.now() - startedAt;
           totalTimeMs = latencyMs;
+          
+          await insertMessage(env, conversationId, 'assistant', result.content, env.MODEL_NAME || 'gpt-oss-120b', 'cache');
           await insertRequest(env, {
             id: requestId,
-            conversationId: body.conversation_id,
+            conversationId: conversationId,
             status: 'completed',
             backend: 'cache',
             cacheHit: true,
@@ -114,23 +129,7 @@ export async function handleChat(request: Request, env: Env): Promise<Response> 
         const backendChain = await selectBackend(env);
         latencyMs = Date.now() - startedAt;
 
-        // Garante conversa. O conversation_id pode vir do cliente (gerado
-        // localmente para uma conversa nova) — se ainda não existir na base
-        // de dados, criamo-la com esse mesmo id em vez de gerar um novo,
-        // para o cliente e o servidor ficarem sempre de acordo.
-        let conversationId = body.conversation_id;
-        const title = message.length > 40 ? `${message.slice(0, 40)}…` : message;
-        if (!conversationId) {
-          const conv = await createConversation(env, title);
-          conversationId = conv.id;
-        } else if (!(await conversationExists(env, conversationId))) {
-          await createConversation(env, title, 'anonymous', conversationId);
-        }
-
-        // Guarda a mensagem do utilizador
-        await insertMessage(env, conversationId, 'user', message);
-
-        // Tenta cada backend da cadeia até um responder com sucesso.
+        // Tenta cada backend da cadeia até um responder com sucesso.r com sucesso.
         // O mock nunca deve falhar, por isso serve de rede de segurança final.
         let lastError: unknown = null;
         for (const backend of backendChain) {
