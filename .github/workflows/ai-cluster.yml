@@ -17,6 +17,10 @@ on:
         required: false
         type: string
 
+concurrency:
+  group: ai-cluster
+  cancel-in-progress: true
+
 jobs:
   run-orchestrator:
     runs-on: ubuntu-latest
