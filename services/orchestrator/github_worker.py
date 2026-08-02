@@ -50,8 +50,12 @@ if __name__ == "__main__":
     print(f"✅ Túnel Cloudflare criado com sucesso: {public_url}")
     
     # 3. Registra na rede (Cloudflare Gateway do Usuário)
-    print("🔄 Enviando Heartbeat para o seu Gateway...")
-    headers = {"Authorization": f"Bearer {NODE_TOKEN}"}
+    print("📡 Enviando Heartbeat para o seu Gateway...")
+    headers = {
+        "Authorization": f"Bearer {NODE_TOKEN}",
+        "Bypass-Tunnel-Reminder": "true",
+        "User-Agent": "curl/7.68.0"
+    }
     payload = {
         "node_id": "github-actions-vm-01",
         "region": "github-us-east",

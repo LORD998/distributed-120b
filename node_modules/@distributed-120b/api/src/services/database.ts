@@ -162,7 +162,7 @@ export async function findHealthyDistributedNode(
   const res = await env.DB.prepare(
     `SELECT id, name, endpoint, region, gpu_model, vram_gb, status, last_heartbeat
      FROM inference_nodes
-     WHERE status = 'healthy' AND last_heartbeat > ?
+     WHERE status IN ('healthy', 'online') AND last_heartbeat > ?
      ORDER BY last_heartbeat DESC
      LIMIT 1`,
   )
