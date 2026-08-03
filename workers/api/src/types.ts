@@ -4,6 +4,7 @@ export interface Env {
   INFERENCE_MODE: string;
   MODEL_NAME: string;
   HF_TOKEN?: string;
+  OPENROUTER_API_KEY?: string;
   CACHE_TTL_SECONDS?: string;
   MAX_MESSAGE_LENGTH?: string;
   RATE_LIMIT_MAX?: string;

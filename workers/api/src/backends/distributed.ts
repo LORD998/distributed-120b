@@ -16,8 +16,8 @@ export const DistributedBackend: Backend = {
       throw new Error('Nenhum nó saudável encontrado.');
     }
 
-    const lastMessage = request.message;
-    const body = { message: lastMessage, use_deep_think: request.use_deep_think };
+    const lastMessage = request.messages[request.messages.length - 1].content;
+    const body = { message: lastMessage };
 
     const res = await fetch(`${node.endpoint}/v1/chat`, {
       method: 'POST',

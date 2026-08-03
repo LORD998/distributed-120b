@@ -1,9 +1,9 @@
 import { useRef, useState } from 'react';
-import { Send, Square, Paperclip, Brain } from 'lucide-react';
+import { Send, Square, Paperclip } from 'lucide-react';
 import styles from './ChatInput.module.css';
 
 interface ChatInputProps {
-  onSend: (text: string, useDeepThink: boolean) => void;
+  onSend: (text: string) => void;
   onStop: () => void;
   isStreaming: boolean;
   disabled?: boolean;
@@ -18,13 +18,12 @@ export function ChatInput({
   maxLength = 4000,
 }: ChatInputProps) {
   const [value, setValue] = useState('');
-  const [useDeepThink, setUseDeepThink] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const handleSubmit = () => {
     const trimmed = value.trim();
     if (!trimmed || isStreaming || disabled) return;
-    onSend(trimmed, useDeepThink);
+    onSend(trimmed);
     setValue('');
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto';
@@ -64,24 +63,13 @@ export function ChatInput({
           <Paperclip size={18} />
         </button>
 
-        <button
-          className={`${styles.attachButton} ${useDeepThink ? styles.deepThinkActive : ''}`}
-          type="button"
-          aria-label="Raciocínio Profundo"
-          title="Raciocínio Profundo (Beta)"
-          onClick={() => setUseDeepThink(!useDeepThink)}
-          style={{ color: useDeepThink ? '#c084fc' : 'inherit' }}
-        >
-          <Brain size={18} />
-        </button>
-
         <textarea
           ref={textareaRef}
           className={styles.textarea}
           value={value}
           onChange={handleChange}
           onKeyDown={handleKeyDown}
-          placeholder="Digite a mensagem... (ou /imagem <descrição> para gerar uma imagem)"
+          placeholder="Digite a mensagem... (Enter para enviar, Shift+Enter para nova linha)"
           rows={1}
           maxLength={maxLength}
           disabled={disabled}

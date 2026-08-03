@@ -15,14 +15,13 @@ export function ChatWindow({ messages, thinking, messagesEndRef }: ChatWindowPro
       {messages.length === 0 ? (
         <div className={styles.emptyState}>
           <div className={styles.emptyIcon}>
-            <div className={styles.glowEffect}></div>
-            <MessageSquare size={36} className={styles.emptyIconSvg} />
+            <MessageSquare size={32} />
           </div>
-          <h2 className={styles.emptyTitle}>Bem-vindo à Aura AI</h2>
+          <h2 className={styles.emptyTitle}>IA Distribuída 120B</h2>
           <p className={styles.emptyText}>
-            A inteligência artificial do futuro, rodando em nossa arquitetura imortal 24/7.
+            Faça uma pergunta ao modelo <code>gpt-oss-120b</code>.
             <br />
-            Peça para <strong>gerar vídeos</strong>, <strong>criar imagens fotorealistas</strong>, ou <strong>transcrever áudios</strong>.
+            As respostas chegam em tempo real, transmitidas progressivamente.
           </p>
         </div>
       ) : (

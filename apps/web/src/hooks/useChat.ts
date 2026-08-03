@@ -52,7 +52,7 @@ export function useChat() {
   });
 
   const sendMessage = useCallback(
-    async (text: string, useDeepThink: boolean = false) => {
+    async (text: string) => {
       const trimmed = text.trim();
       if (!trimmed || isStreaming) return;
 
@@ -117,7 +117,6 @@ export function useChat() {
         conversation_id: conversationId,
         message: trimmed,
         max_output_tokens: 512,
-        use_deep_think: useDeepThink,
       });
     },
     [isStreaming, conversations, send],

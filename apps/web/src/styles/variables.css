@@ -1,48 +1,41 @@
 :root {
-  /* Cores base Premium (Deep Midnight/Onyx) */
-  --bg-primary: #050508;
-  --bg-secondary: #0c0c12;
-  --bg-tertiary: #13131b;
-  --bg-glass: rgba(12, 12, 18, 0.65);
-  --bg-glass-strong: rgba(12, 12, 18, 0.85);
+  /* Cores base */
+  --bg-primary: #0a0a0c;
+  --bg-secondary: #131316;
+  --bg-tertiary: #1a1a1f;
+  --bg-glass: rgba(19, 19, 22, 0.7);
+  --bg-glass-strong: rgba(19, 19, 22, 0.9);
 
   /* Texto */
-  --text-primary: #f8f9fa;
-  --text-secondary: #b3b3bf;
-  --text-muted: #6e6e80;
+  --text-primary: #f0f0f0;
+  --text-secondary: #a0a0a8;
+  --text-muted: #6b6b74;
 
-  /* Acento Premium (Aura Cyan/Violet) */
-  --accent-color: #8b5cf6;
-  --accent-hover: #a78bfa;
-  --accent-soft: rgba(139, 92, 246, 0.15);
-  --accent-glow: rgba(139, 92, 246, 0.4);
-  
-  /* Gradiente Primário */
-  --gradient-primary: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
-  --gradient-hover: linear-gradient(135deg, #4f46e5 0%, #9333ea 100%);
+  /* Acento */
+  --accent-color: #6366f1;
+  --accent-hover: #4f46e5;
+  --accent-soft: rgba(99, 102, 241, 0.15);
+  --accent-glow: rgba(99, 102, 241, 0.35);
 
   /* Estado */
-  --success: #10b981;
+  --success: #22c55e;
   --warning: #f59e0b;
-  --danger: #f43f5e;
-  --info: #0ea5e9;
+  --danger: #ef4444;
+  --info: #38bdf8;
 
-  /* Bordas Refinadas */
-  --border-color: rgba(255, 255, 255, 0.05);
-  --border-color-strong: rgba(255, 255, 255, 0.1);
-  --border-glow: rgba(139, 92, 246, 0.2);
+  /* Bordas */
+  --border-color: rgba(255, 255, 255, 0.08);
+  --border-color-strong: rgba(255, 255, 255, 0.14);
 
   /* Sombras */
-  --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 8px 32px rgba(0, 0, 0, 0.4);
-  --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.5);
-  --shadow-accent: 0 0 24px var(--accent-glow);
-  --shadow-glass: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.4);
+  --shadow-accent: 0 0 20px var(--accent-glow);
 
   /* Tipografia */
-  --font-heading: 'Outfit', system-ui, sans-serif;
-  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
+  --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
 
   /* Raio */
   --radius-sm: 8px;

@@ -3,32 +3,34 @@ import { MockBackend } from '../backends/mock';
 import { HuggingFaceBackend } from '../backends/huggingface';
 import { DistributedBackend } from '../backends/distributed';
 import { findHealthyDistributedNode } from './database';
+import { OpenRouterBackend } from '../backends/openrouter';
+import { GroqBackend } from '../backends/groq';
 
 /**
  * Seleciona a cadeia de backends de inferência, por ordem de preferência.
  *
- * Fase 1: cache → Hugging Face (se HF_TOKEN) → mock
- * Fase 2: cache → nós próprios/voluntários → rede distribuída → Hugging Face → mock
- *
- * A cadeia é usada com fallback: se um backend falhar (ex.: nó distribuído
- * anunciado como saudável mas ainda sem inferência real ligada), o pedido
- * cai para o próximo em vez de falhar por completo. O mock é sempre o
- * último elemento — nunca deve lançar erro.
+ * Fase 1: cache → Groq (ultra rápido/grátis) → OpenRouter (se tiver crédito) → Hugging Face → mock
  */
 export async function selectBackend(env: Env): Promise<Backend[]> {
   const mode = env.INFERENCE_MODE ?? 'mock';
   const chain: Backend[] = [];
 
-  // Tenta primeiro um nó distribuído saudável (Fase 2)
-  const distributedNode = await findHealthyDistributedNode(env);
-  if (distributedNode) {
-    chain.push(DistributedBackend);
+  // 1º lugar absoluto agora: GROQ (ultra veloz, Llama 3)
+  if (env.GROQ_API_KEY) {
+     chain.push(GroqBackend);
   }
 
+  // 2º fallback
+  if (env.OPENROUTER_API_KEY) {
+     chain.push(OpenRouterBackend);
+  }
+
+  // 3º fallback
   if (mode === 'huggingface' && env.HF_TOKEN) {
     chain.push(HuggingFaceBackend);
   }
 
+  // Última esperança
   chain.push(MockBackend);
 
   return chain;
@@ -36,6 +38,10 @@ export async function selectBackend(env: Env): Promise<Backend[]> {
 
 export async function getBackendInfo(env: Env): Promise<BackendChoice> {
   const mode = env.INFERENCE_MODE ?? 'mock';
+
+  if (env.GROQ_API_KEY) {
+    return { id: 'groq', mode: 'groq' };
+  }
 
   if (mode === 'huggingface' && env.HF_TOKEN) {
     return { id: 'huggingface', mode: 'huggingface' };

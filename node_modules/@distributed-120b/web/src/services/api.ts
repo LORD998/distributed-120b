@@ -69,6 +69,76 @@ export async function cancelGeneration(requestId: string): Promise<void> {
   if (!res.ok) throw new Error(`Erro ${res.status}`);
 }
 
+export async function generateImage(prompt: string): Promise<{ url: string; prompt: string }> {
+  const res = await fetch(url('/v1/image'), {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ prompt }),
+  });
+  return handleResponse(res);
+}
+
+export interface CoderModel {
+  id: string;
+  label: string;
+}
+
+export async function listCoderModels(): Promise<{ models: CoderModel[]; default: string }> {
+  const res = await fetch(url('/v1/coder/models'));
+  return handleResponse(res);
+}
+
+/**
+ * Assistentes extra isolados (via OpenRouter, grátis).
+ * Não partilham estado com o streamChat do gpt-oss-120b.
+ */
+export async function streamCoder(
+  message: string,
+  model: string | undefined,
+  onEvent: (event: StreamEvent) => void,
+  signal?: AbortSignal,
+): Promise<void> {
+  const res = await fetch(url('/v1/coder'), {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ message, model }),
+    signal,
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(text || `Erro ${res.status}`);
+  }
+  if (!res.body) throw new Error('Sem corpo de resposta');
+
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+
+  while (true) {
+    const { value, done } = await reader.read();
+    if (done) break;
+
+    buffer += decoder.decode(value, { stream: true });
+    const events = buffer.split('\n\n');
+    buffer = events.pop() ?? '';
+
+    for (const rawEvent of events) {
+      const dataLine = rawEvent.split('\n').find((line) => line.startsWith('data: '));
+      if (!dataLine) continue;
+
+      const payload = dataLine.slice(6).trim();
+      if (!payload) continue;
+
+      try {
+        onEvent(JSON.parse(payload) as StreamEvent);
+      } catch {
+        // ignora payloads inválidos
+      }
+    }
+  }
+}
+
 /**
  * Envia uma mensagem e lê a resposta em streaming (SSE).
  * Invoca onEvent para cada evento recebido.

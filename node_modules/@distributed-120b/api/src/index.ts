@@ -3,6 +3,8 @@ import { handleChat } from './routes/chat';
 import { handleStatus } from './routes/status';
 import { handleConversations } from './routes/conversations';
 import { handleCancel, handleNodes } from './routes/nodes';
+import { handleImage } from './routes/image';
+import { handleCoder, handleCoderModels } from './routes/coder';
 
 const CORS_HEADERS: Record<string, string> = {
   'Access-Control-Allow-Origin': '*',
@@ -25,6 +27,18 @@ export default {
       switch (true) {
         case url.pathname === '/v1/chat':
           response = await handleChat(request, env);
+          break;
+
+        case url.pathname === '/v1/image':
+          response = await handleImage(request, env);
+          break;
+
+        case url.pathname === '/v1/coder/models':
+          response = handleCoderModels();
+          break;
+
+        case url.pathname === '/v1/coder':
+          response = await handleCoder(request, env);
           break;
 
         case url.pathname === '/v1/status' && request.method === 'GET':
@@ -55,6 +69,9 @@ export default {
               version: '0.1.0',
               endpoints: [
                 'POST /v1/chat',
+                'POST /v1/image',
+                'POST /v1/coder',
+                'GET /v1/coder/models',
                 'GET /v1/status',
                 'GET /v1/conversations',
                 'GET /v1/conversations/:id',

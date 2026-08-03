@@ -46,21 +46,17 @@
 }
 
 .userBubble {
-  background: var(--gradient-primary);
+  background: linear-gradient(135deg, var(--accent-color), var(--accent-hover));
   color: white;
   border: none;
   border-top-right-radius: var(--radius-sm);
-  box-shadow: var(--shadow-sm);
 }
 
 .assistantBubble {
-  background: var(--bg-glass);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: var(--bg-secondary);
   color: var(--text-primary);
-  border: 1px solid var(--border-color-strong);
+  border: 1px solid var(--border-color);
   border-top-left-radius: var(--radius-sm);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
 }
 
 .errorBubble {
@@ -211,51 +207,4 @@
   .bubble {
     max-width: 85%;
   }
-}
-
-/* Deep Think Box */
-.thinkBox {
-  margin-bottom: 12px;
-  border-radius: var(--radius-md);
-  background: rgba(192, 132, 252, 0.05);
-  border: 1px solid rgba(192, 132, 252, 0.2);
-  overflow: hidden;
-  transition: all var(--transition-fast);
-}
-
-.thinkBox[open] {
-  background: rgba(192, 132, 252, 0.08);
-  border-color: rgba(192, 132, 252, 0.3);
-}
-
-.thinkSummary {
-  padding: 8px 12px;
-  font-size: 13px;
-  font-weight: 600;
-  color: #c084fc;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  user-select: none;
-  border-bottom: 1px solid transparent;
-}
-
-.thinkBox[open] .thinkSummary {
-  border-bottom-color: rgba(192, 132, 252, 0.2);
-}
-
-.thinkSummary::before {
-  content: '🧠';
-  font-size: 14px;
-}
-
-.thinkContent {
-  padding: 12px;
-  font-size: 14px;
-  color: var(--text-secondary);
-  font-family: var(--font-mono);
-  line-height: 1.5;
-  border-left: 2px solid rgba(192, 132, 252, 0.4);
-  margin-left: 10px;
 }

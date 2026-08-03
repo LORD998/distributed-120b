@@ -1,0 +1,47 @@
+.panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+
+.banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  background: var(--accent-soft);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.banner svg {
+  color: var(--accent-color);
+  flex-shrink: 0;
+}
+
+.modelSelect {
+  margin-left: auto;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.modelSelect:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.errorBar {
+  padding: 8px 20px;
+  background: rgba(244, 63, 94, 0.12);
+  border-top: 1px solid rgba(244, 63, 94, 0.3);
+  color: var(--danger);
+  font-size: 13px;
+}

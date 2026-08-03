@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Zap, Loader2 } from 'lucide-react';
+import { Zap, Loader2, MessageSquare, Code2 } from 'lucide-react';
 import type { StatusResponse } from './types';
 import { getStatus } from './services/api';
 import { useChat } from './hooks/useChat';
@@ -7,7 +7,10 @@ import { ChatWindow } from './components/ChatWindow';
 import { ChatInput } from './components/ChatInput';
 import { ConversationSidebar } from './components/ConversationSidebar';
 import { NetworkPanel } from './components/NetworkPanel';
+import { CoderPanel } from './components/CoderPanel';
 import styles from './App.module.css';
+
+type View = 'chat' | 'coder';
 
 export default function App() {
   const {
@@ -26,6 +29,7 @@ export default function App() {
 
   const [status, setStatus] = useState<StatusResponse | null>(null);
   const [statusLoading, setStatusLoading] = useState(true);
+  const [view, setView] = useState<View>('chat');
 
   useEffect(() => {
     getStatus()
@@ -49,15 +53,31 @@ export default function App() {
         <header className={styles.header}>
           <div className={styles.headerLeft}>
             <div className={styles.logo}>
-              <div className={styles.logoIcon}>
-                <Zap size={18} fill="currentColor" strokeWidth={1} />
-              </div>
-              <span className={styles.brandName}>Aura AI</span>
+              <Zap size={20} fill="currentColor" />
+              <span>120B Network</span>
             </div>
-            <span className={styles.headerBadge}>Workspace</span>
+            <span className={styles.headerBadge}>Fase 1</span>
           </div>
           <div className={styles.headerRight}>
-            {conversations.activeId && (
+            <div className={styles.viewToggle}>
+              <button
+                type="button"
+                className={`${styles.viewToggleBtn} ${view === 'chat' ? styles.viewToggleBtnActive : ''}`}
+                onClick={() => setView('chat')}
+              >
+                <MessageSquare size={14} />
+                <span>Chat</span>
+              </button>
+              <button
+                type="button"
+                className={`${styles.viewToggleBtn} ${view === 'coder' ? styles.viewToggleBtnActive : ''}`}
+                onClick={() => setView('coder')}
+              >
+                <Code2 size={14} />
+                <span>Código</span>
+              </button>
+            </div>
+            {view === 'chat' && conversations.activeId && (
               <span className={styles.muted}>Conversa ativa</span>
             )}
             <span
@@ -80,23 +100,29 @@ export default function App() {
           </div>
         </header>
 
-        <ChatWindow
-          messages={messages}
-          thinking={thinking}
-          messagesEndRef={messagesEndRef}
-        />
+        {view === 'chat' ? (
+          <>
+            <ChatWindow
+              messages={messages}
+              thinking={thinking}
+              messagesEndRef={messagesEndRef}
+            />
 
-        {error && (
-          <div className={styles.errorBar}>
-            <span>{error}</span>
-          </div>
+            {error && (
+              <div className={styles.errorBar}>
+                <span>{error}</span>
+              </div>
+            )}
+
+            <ChatInput
+              onSend={sendMessage}
+              onStop={stop}
+              isStreaming={isStreaming}
+            />
+          </>
+        ) : (
+          <CoderPanel />
         )}
-
-        <ChatInput
-          onSend={sendMessage}
-          onStop={stop}
-          isStreaming={isStreaming}
-        />
       </main>
 
       <NetworkPanel status={status} metrics={metrics} loading={statusLoading} />
