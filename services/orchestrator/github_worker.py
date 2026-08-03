@@ -11,18 +11,23 @@ def run_uvicorn():
     uvicorn.run("main:app", host="0.0.0.0", port=8000)
 
 def start_localtunnel():
-    print("⏳ Iniciando LocalTunnel (grátis/sem token)...")
-    # Redireciona a saída para um arquivo para evitar block buffering do Node.js
-    os.system("npx --yes localtunnel --port 8000 > tunnel.log 2>&1 &")
+    print("⏳ Iniciando Cloudflare Tunnel (Estável)...")
+    
+    # Download do cloudflared
+    os.system("wget -q https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64")
+    os.system("chmod +x cloudflared-linux-amd64")
+    
+    # Redireciona a saída para um arquivo
+    os.system("./cloudflared-linux-amd64 tunnel --url http://127.0.0.1:8000 > tunnel.log 2>&1 &")
     
     public_url = None
     # Faz polling no arquivo por 15 segundos
-    for _ in range(15):
+    for _ in range(25):
         time.sleep(1)
         if os.path.exists("tunnel.log"):
             with open("tunnel.log", "r") as f:
                 content = f.read()
-                match = re.search(r"https://[a-zA-Z0-9-]+\.loca\.lt", content)
+                match = re.search(r"https://[a-zA-Z0-9-]+\.trycloudflare\.com", content)
                 if match:
                     public_url = match.group(0)
                     break
