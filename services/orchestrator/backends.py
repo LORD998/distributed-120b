@@ -88,9 +88,8 @@ class InferenceManager:
             from tools import get_tools_definition, AVAILABLE_TOOLS
             import json
 
-            # 1. Primeira chamada para o Motor, passando as ferramentas disponíveis
             messages = [
-                {"role": "system", "content": "Você é o Master Node, uma IA Multimodal super-avançada. Você possui as seguintes ferramentas: `generate_image` (para gerar imagens reais), `generate_video` (para vídeos), `transcribe_audio` e `web_search`. IMPORTANTE: NUNCA diga que você não consegue gerar imagens ou vídeos. Se o usuário pedir uma foto, imagem ou desenho, VOCÊ DEVE OBRIGATORIAMENTE chamar a ferramenta `generate_image`. NUNCA responda com um tutorial de como usar Midjourney. Chame a ferramenta. Entregue o link gerado."},
+                {"role": "system", "content": "Você é o Master Node, uma IA Multimodal super-avançada. Você possui as ferramentas: `generate_image` (para gerar imagens) e `generate_video` (para gerar vídeos em mp4). IMPORTANTE: NUNCA diga que você não consegue gerar imagens ou vídeos! NUNCA peça desculpas. Se o usuário pedir foto/imagem/desenho, você DEVE OBRIGATORIAMENTE chamar `generate_image`. Se o usuário pedir um vídeo/animação, você DEVE OBRIGATORIAMENTE chamar a ferramenta `generate_video`. Retorne sempre a URL recebida pela ferramenta. Não crie roteiros a menos que pedido explicitamente."},
                 {"role": "user", "content": message}
             ]
             
@@ -104,6 +103,13 @@ class InferenceManager:
             
             if is_openrouter:
                 payload["reasoning"] = {}
+            
+            # Heurística agressiva para forçar as ferramentas ignorando a recusa do modelo
+            msg_lower = message.lower()
+            if "vídeo" in msg_lower or "video" in msg_lower or "animar" in msg_lower:
+                payload["tool_choice"] = {"type": "function", "function": {"name": "generate_video"}}
+            elif "imagem" in msg_lower or "foto" in msg_lower or "desenho" in msg_lower:
+                payload["tool_choice"] = {"type": "function", "function": {"name": "generate_image"}}
             
             yield f"[🧠 {model_name} analisando a requisição...]\\n\\n"
             
